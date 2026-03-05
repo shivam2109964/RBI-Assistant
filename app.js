@@ -2,12 +2,14 @@ import additionTool from "./tools/addition.js";
 import subtractionTool from "./tools/subtraction.js";
 import multiplicationTool from "./tools/multiplication.js";
 import divisionTool from "./tools/division.js";
+import percentageTool from "./tools/percentage.js";
 
 const tools = {
   addition: additionTool,
   subtraction: subtractionTool,
   multiplication: multiplicationTool,
   division: divisionTool,
+  percentage: percentageTool,
 };
 
 const state = {
@@ -59,6 +61,7 @@ function startTimer() {
 
 function renderQuestion() {
   const tool = getActiveTool();
+  configureAnswerInput(tool);
   state.currentQuestion = tool.generateQuestion();
   ui.toolTitle.textContent = tool.title;
   ui.questionDisplay.textContent = state.currentQuestion.prompt;
@@ -66,6 +69,20 @@ function renderQuestion() {
   ui.answerInput.value = "";
   ui.answerInput.focus();
   startTimer();
+}
+
+function configureAnswerInput(tool) {
+  const inputConfig = typeof tool.getInputConfig === "function"
+    ? tool.getInputConfig()
+    : {};
+
+  const type = inputConfig.type ?? "text";
+  const inputMode = inputConfig.inputMode ?? "numeric";
+  const placeholder = inputConfig.placeholder ?? "Type your answer";
+
+  ui.answerInput.type = type;
+  ui.answerInput.placeholder = placeholder;
+  ui.answerInput.setAttribute("inputmode", inputMode);
 }
 
 function syncDigitControls() {
