@@ -21,7 +21,7 @@
         <button class="tool-button" data-tool="multiplication">Multiplication Trainer</button>
         <button class="tool-button" data-tool="division">Division Trainer</button>
         <button class="tool-button" data-tool="percentage">Percentage Trainer</button>
-        <button class="tool-button" data-tool="squareCube" disabled>Square / Cube Trainer</button>
+        <button class="tool-button" data-tool="squareCube">Square / Cube Trainer</button>
         <button class="tool-button" data-tool="simplification" disabled>Simplification Trainer</button>
         <button class="tool-button" data-tool="numberSeries" disabled>Number Series Trainer</button>
       </nav>
@@ -47,6 +47,15 @@
             <option value="3">3</option>
             <option value="4">4</option>
             <option value="5">5</option>
+          </select>
+        </div>
+
+        <div class="power-mode-controls" id="power-mode-controls" hidden>
+          <label for="power-mode">Mode</label>
+          <select id="power-mode" aria-label="Square cube mode">
+            <option value="mix" selected>Mix</option>
+            <option value="square">Square only</option>
+            <option value="cube">Cube only</option>
           </select>
         </div>
 

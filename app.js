@@ -3,6 +3,7 @@ import subtractionTool from "./tools/subtraction.js";
 import multiplicationTool from "./tools/multiplication.js";
 import divisionTool from "./tools/division.js";
 import percentageTool from "./tools/percentage.js";
+import squareCubeTool from "./tools/squareCube.js";
 
 const tools = {
   addition: additionTool,
@@ -10,6 +11,7 @@ const tools = {
   multiplication: multiplicationTool,
   division: divisionTool,
   percentage: percentageTool,
+  squareCube: squareCubeTool,
 };
 
 const state = {
@@ -30,6 +32,8 @@ const ui = {
   digitControls: document.getElementById("digit-controls"),
   leftDigits: document.getElementById("left-digits"),
   rightDigits: document.getElementById("right-digits"),
+  powerModeControls: document.getElementById("power-mode-controls"),
+  powerMode: document.getElementById("power-mode"),
   questionDisplay: document.getElementById("question-display"),
   answerForm: document.getElementById("answer-form"),
   answerInput: document.getElementById("answer-input"),
@@ -64,7 +68,11 @@ function renderQuestion() {
   configureAnswerInput(tool);
   state.currentQuestion = tool.generateQuestion();
   ui.toolTitle.textContent = tool.title;
-  ui.questionDisplay.textContent = state.currentQuestion.prompt;
+  if (state.currentQuestion.promptHtml) {
+    ui.questionDisplay.innerHTML = state.currentQuestion.promptHtml;
+  } else {
+    ui.questionDisplay.textContent = state.currentQuestion.prompt;
+  }
   ui.questionNumber.textContent = String(state.questionNumber);
   ui.answerInput.value = "";
   ui.answerInput.focus();
@@ -96,6 +104,18 @@ function syncDigitControls() {
 
   ui.leftDigits.value = String(tool.settings.leftDigits ?? 1);
   ui.rightDigits.value = String(tool.settings.rightDigits ?? 1);
+}
+
+function syncPowerModeControls() {
+  const tool = getActiveTool();
+  const canConfigureMode = typeof tool.setMode === "function" && tool.settings;
+
+  ui.powerModeControls.hidden = !canConfigureMode;
+  if (!canConfigureMode) {
+    return;
+  }
+
+  ui.powerMode.value = String(tool.settings.mode ?? "mix");
 }
 
 function formatSlowestQuestions() {
@@ -164,6 +184,7 @@ function resetForTool(toolKey) {
   ui.feedback.textContent = "";
   ui.feedback.className = "feedback";
   syncDigitControls();
+  syncPowerModeControls();
   updateMetrics();
   renderQuestion();
 }
@@ -176,6 +197,18 @@ function handleDigitChange() {
 
   tool.setDigitCounts(ui.leftDigits.value, ui.rightDigits.value);
   syncDigitControls();
+  state.currentQuestion = null;
+  renderQuestion();
+}
+
+function handlePowerModeChange() {
+  const tool = getActiveTool();
+  if (typeof tool.setMode !== "function") {
+    return;
+  }
+
+  tool.setMode(ui.powerMode.value);
+  syncPowerModeControls();
   state.currentQuestion = null;
   renderQuestion();
 }
@@ -206,5 +239,6 @@ ui.toolButtons.forEach((button) => {
 
 ui.leftDigits.addEventListener("change", handleDigitChange);
 ui.rightDigits.addEventListener("change", handleDigitChange);
+ui.powerMode.addEventListener("change", handlePowerModeChange);
 
 resetForTool("addition");
