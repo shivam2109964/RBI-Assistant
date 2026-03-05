@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rapid Math Trainer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <header class="header">
+      <h1>Rapid Math Trainer</h1>
+      <p>Build Calculation Speed</p>
+    </header>
+
+    <aside class="sidebar" aria-label="Practice Modules">
+      <h2>Tools</h2>
+      <nav>
+        <button class="tool-button active" data-tool="addition">Addition Trainer</button>
+        <button class="tool-button" data-tool="subtraction" disabled>Subtraction Trainer</button>
+        <button class="tool-button" data-tool="multiplication" disabled>Multiplication Trainer</button>
+        <button class="tool-button" data-tool="division" disabled>Division Trainer</button>
+        <button class="tool-button" data-tool="percentage" disabled>Percentage Trainer</button>
+        <button class="tool-button" data-tool="squareCube" disabled>Square / Cube Trainer</button>
+        <button class="tool-button" data-tool="simplification" disabled>Simplification Trainer</button>
+        <button class="tool-button" data-tool="numberSeries" disabled>Number Series Trainer</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <section class="practice-card" aria-live="polite">
+        <h2 id="tool-title">Addition Trainer</h2>
+
+        <div class="digit-controls" id="digit-controls">
+          <label for="left-digits">Left digits</label>
+          <select id="left-digits" aria-label="Left side digit count">
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+          <label for="right-digits">Right digits</label>
+          <select id="right-digits" aria-label="Right side digit count">
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        </div>
+
+        <div class="question-display" id="question-display">0 + 0 = ?</div>
+
+        <form id="answer-form" autocomplete="off">
+          <label class="sr-only" for="answer-input">Answer</label>
+          <input id="answer-input" type="number" inputmode="numeric" placeholder="Type your answer" required />
+          <button type="submit" id="submit-button">Submit</button>
+        </form>
+
+        <div class="status-row">
+          <div>Question: <span id="question-number">1</span></div>
+          <div>Timer: <span id="timer-seconds">0</span>s</div>
+          <div>Correct: <span id="correct-count">0</span></div>
+          <div>Wrong: <span id="wrong-count">0</span></div>
+        </div>
+
+        <p id="feedback" class="feedback" role="status"></p>
+      </section>
+
+      <section class="performance-panel">
+        <h3>Performance</h3>
+        <div class="metrics-grid">
+          <div class="metric">
+            <span class="metric-label">Average Time / Question</span>
+            <span class="metric-value" id="avg-time">0.00s</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Slowest Questions</span>
+            <span class="metric-value" id="slowest-questions">-</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Accuracy</span>
+            <span class="metric-value" id="accuracy">0%</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">Daily Math Speed Training</footer>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
