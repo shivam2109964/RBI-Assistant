@@ -5,6 +5,7 @@ import divisionTool from "./tools/division.js";
 import percentageTool from "./tools/percentage.js";
 import squareCubeTool from "./tools/squareCube.js";
 import simplificationTool from "./tools/simplification.js";
+import numberSeriesTool from "./tools/numberSeries.js";
 
 const tools = {
   addition: additionTool,
@@ -14,6 +15,7 @@ const tools = {
   percentage: percentageTool,
   squareCube: squareCubeTool,
   simplification: simplificationTool,
+  numberSeries: numberSeriesTool,
 };
 
 const state = {
@@ -27,6 +29,7 @@ const state = {
   timerSeconds: 0,
   timerId: null,
   questionHistory: [],
+  patternStats: {},
 };
 
 const ui = {
@@ -47,6 +50,7 @@ const ui = {
   avgTime: document.getElementById("avg-time"),
   slowestQuestions: document.getElementById("slowest-questions"),
   accuracy: document.getElementById("accuracy"),
+  patternInsight: document.getElementById("pattern-insight"),
   toolButtons: Array.from(document.querySelectorAll(".tool-button")),
 };
 
@@ -80,6 +84,7 @@ function renderQuestion() {
   configureAnswerInput(tool);
   state.currentQuestion = tool.generateQuestion();
   ui.toolTitle.textContent = tool.title;
+  ui.questionDisplay.classList.toggle("series-question", state.activeToolKey === "numberSeries");
   if (state.currentQuestion.promptHtml) {
     ui.questionDisplay.innerHTML = state.currentQuestion.promptHtml;
   } else {
@@ -156,6 +161,64 @@ function updateMetrics() {
   ui.accuracy.textContent = `${accuracy.toFixed(1)}%`;
 
   ui.slowestQuestions.textContent = formatSlowestQuestions();
+  ui.patternInsight.textContent = formatPatternInsight();
+}
+
+function registerPatternResult(isCorrect) {
+  const pattern = state.currentQuestion?.pattern;
+  if (!pattern) {
+    return;
+  }
+
+  const key = `${state.activeToolKey}::${pattern}`;
+  if (!state.patternStats[key]) {
+    state.patternStats[key] = {
+      attempts: 0,
+      correct: 0,
+      totalTime: 0,
+      pattern,
+      toolId: state.activeToolKey,
+    };
+  }
+
+  state.patternStats[key].attempts += 1;
+  state.patternStats[key].totalTime += state.timerSeconds;
+  if (isCorrect) {
+    state.patternStats[key].correct += 1;
+  }
+}
+
+function formatPatternInsight() {
+  const entries = Object.values(state.patternStats)
+    .filter((entry) => entry.toolId === state.activeToolKey && entry.attempts > 0);
+
+  if (!entries.length) {
+    return "-";
+  }
+
+  let weakest = entries[0];
+  for (let i = 1; i < entries.length; i += 1) {
+    const current = entries[i];
+    const currentAccuracy = current.correct / current.attempts;
+    const weakestAccuracy = weakest.correct / weakest.attempts;
+
+    if (currentAccuracy < weakestAccuracy) {
+      weakest = current;
+      continue;
+    }
+
+    if (currentAccuracy === weakestAccuracy) {
+      const currentAvg = current.totalTime / current.attempts;
+      const weakestAvg = weakest.totalTime / weakest.attempts;
+      if (currentAvg > weakestAvg) {
+        weakest = current;
+      }
+    }
+  }
+
+  const avgTime = weakest.totalTime / weakest.attempts;
+  const accuracy = (weakest.correct / weakest.attempts) * 100;
+  return `${weakest.pattern}: ${avgTime.toFixed(1)}s, ${accuracy.toFixed(0)}%`;
 }
 
 function registerResult(isCorrect, options = {}) {
@@ -167,6 +230,7 @@ function registerResult(isCorrect, options = {}) {
     prompt: state.currentQuestion.prompt,
     timeTaken: state.timerSeconds,
   });
+  registerPatternResult(isCorrect);
 
   if (isCorrect) {
     state.correct += 1;
