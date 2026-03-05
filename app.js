@@ -1,11 +1,13 @@
 import additionTool from "./tools/addition.js";
 import subtractionTool from "./tools/subtraction.js";
 import multiplicationTool from "./tools/multiplication.js";
+import divisionTool from "./tools/division.js";
 
 const tools = {
   addition: additionTool,
   subtraction: subtractionTool,
   multiplication: multiplicationTool,
+  division: divisionTool,
 };
 
 const state = {
@@ -156,6 +158,7 @@ function handleDigitChange() {
   }
 
   tool.setDigitCounts(ui.leftDigits.value, ui.rightDigits.value);
+  syncDigitControls();
   state.currentQuestion = null;
   renderQuestion();
 }
