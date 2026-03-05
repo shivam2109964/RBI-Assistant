@@ -1,7 +1,11 @@
 import additionTool from "./tools/addition.js";
+import subtractionTool from "./tools/subtraction.js";
+import multiplicationTool from "./tools/multiplication.js";
 
 const tools = {
   addition: additionTool,
+  subtraction: subtractionTool,
+  multiplication: multiplicationTool,
 };
 
 const state = {
