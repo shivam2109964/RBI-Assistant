@@ -5,8 +5,10 @@ import divisionTool from "./tools/division.js";
 import tableTool from "./tools/table.js";
 import percentageTool from "./tools/percentage.js";
 import squareCubeTool from "./tools/squareCube.js";
+import squareRootTool from "./tools/squareRoot.js";
 import simplificationTool from "./tools/simplification.js";
 import numberSeriesTool from "./tools/numberSeries.js";
+import mixTool from "./tools/mix.js";
 
 const tools = {
   addition: additionTool,
@@ -16,8 +18,10 @@ const tools = {
   table: tableTool,
   percentage: percentageTool,
   squareCube: squareCubeTool,
+  squareRoot: squareRootTool,
   simplification: simplificationTool,
   numberSeries: numberSeriesTool,
+  mix: mixTool,
 };
 
 const state = {
