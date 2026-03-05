@@ -2,6 +2,7 @@ import additionTool from "./tools/addition.js";
 import subtractionTool from "./tools/subtraction.js";
 import multiplicationTool from "./tools/multiplication.js";
 import divisionTool from "./tools/division.js";
+import tableTool from "./tools/table.js";
 import percentageTool from "./tools/percentage.js";
 import squareCubeTool from "./tools/squareCube.js";
 import simplificationTool from "./tools/simplification.js";
@@ -12,6 +13,7 @@ const tools = {
   subtraction: subtractionTool,
   multiplication: multiplicationTool,
   division: divisionTool,
+  table: tableTool,
   percentage: percentageTool,
   squareCube: squareCubeTool,
   simplification: simplificationTool,
