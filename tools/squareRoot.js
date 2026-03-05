@@ -2,7 +2,7 @@ const squareRootTool = {
   id: "squareRoot",
   title: "Square Root Trainer",
   settings: {
-    timeLimitSeconds: 7,
+    timeLimitSeconds: 10,
     minNumber: 1,
     maxNumber: 30,
     tolerance: 0.01,

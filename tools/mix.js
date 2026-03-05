@@ -28,7 +28,7 @@ const mixTool = {
   id: "mix",
   title: "Mix Trainer",
   settings: {
-    timeLimitSeconds: 7,
+    timeLimitSeconds: 10,
   },
 
   getInputConfig() {

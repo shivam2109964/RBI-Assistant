@@ -2,7 +2,7 @@ const numberSeriesTool = {
   id: "numberSeries",
   title: "Number Series Trainer",
   settings: {
-    timeLimitSeconds: 7,
+    timeLimitSeconds: 10,
   },
 
   getInputConfig() {

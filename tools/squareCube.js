@@ -3,7 +3,7 @@ const squareCubeTool = {
   title: "Square / Cube Trainer",
   settings: {
     mode: "mix",
-    timeLimitSeconds: 7,
+    timeLimitSeconds: 10,
   },
 
   getInputConfig() {

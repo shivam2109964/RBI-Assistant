@@ -2,7 +2,7 @@ const tableTool = {
   id: "table",
   title: "Table Trainer",
   settings: {
-    timeLimitSeconds: 7,
+    timeLimitSeconds: 10,
     minTable: 1,
     maxTable: 20,
   },

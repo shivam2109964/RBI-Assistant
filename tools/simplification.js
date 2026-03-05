@@ -2,7 +2,7 @@ const simplificationTool = {
   id: "simplification",
   title: "Simplification Trainer",
   settings: {
-    timeLimitSeconds: 7,
+    timeLimitSeconds: 10,
   },
 
   getInputConfig() {

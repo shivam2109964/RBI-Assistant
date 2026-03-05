@@ -4,7 +4,7 @@ const additionTool = {
   settings: {
     leftDigits: 1,
     rightDigits: 1,
-    timeLimitSeconds: 7,
+    timeLimitSeconds: 10,
   },
 
   generateQuestion() {
