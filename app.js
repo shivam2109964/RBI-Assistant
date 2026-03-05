@@ -4,6 +4,7 @@ import multiplicationTool from "./tools/multiplication.js";
 import divisionTool from "./tools/division.js";
 import percentageTool from "./tools/percentage.js";
 import squareCubeTool from "./tools/squareCube.js";
+import simplificationTool from "./tools/simplification.js";
 
 const tools = {
   addition: additionTool,
@@ -12,6 +13,7 @@ const tools = {
   division: divisionTool,
   percentage: percentageTool,
   squareCube: squareCubeTool,
+  simplification: simplificationTool,
 };
 
 const state = {
@@ -53,6 +55,11 @@ function getActiveTool() {
 }
 
 function startTimer() {
+  const tool = getActiveTool();
+  const timeLimit = typeof tool.getTimeLimitSeconds === "function"
+    ? Number(tool.getTimeLimitSeconds())
+    : Number(tool.settings?.timeLimitSeconds);
+
   clearInterval(state.timerId);
   state.timerSeconds = 0;
   ui.timerSeconds.textContent = "0";
@@ -60,6 +67,11 @@ function startTimer() {
   state.timerId = setInterval(() => {
     state.timerSeconds += 1;
     ui.timerSeconds.textContent = String(state.timerSeconds);
+
+    if (Number.isFinite(timeLimit) && timeLimit > 0 && state.timerSeconds >= timeLimit) {
+      clearInterval(state.timerId);
+      registerResult(false, { reason: "timeout" });
+    }
   }, 1000);
 }
 
@@ -146,7 +158,7 @@ function updateMetrics() {
   ui.slowestQuestions.textContent = formatSlowestQuestions();
 }
 
-function registerResult(isCorrect) {
+function registerResult(isCorrect, options = {}) {
   state.answeredQuestions += 1;
   state.totalTime += state.timerSeconds;
 
@@ -163,7 +175,8 @@ function registerResult(isCorrect) {
   } else {
     state.wrong += 1;
     const tool = getActiveTool();
-    ui.feedback.textContent = `Wrong. Correct answer: ${tool.getCorrectAnswer(state.currentQuestion)}`;
+    const prefix = options.reason === "timeout" ? "Time up." : "Wrong.";
+    ui.feedback.textContent = `${prefix} Correct answer: ${tool.getCorrectAnswer(state.currentQuestion)}`;
     ui.feedback.className = "feedback wrong";
   }
 

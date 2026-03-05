@@ -4,6 +4,7 @@ const subtractionTool = {
   settings: {
     leftDigits: 1,
     rightDigits: 1,
+    timeLimitSeconds: 7,
   },
 
   generateQuestion() {
@@ -29,6 +30,10 @@ const subtractionTool = {
 
   getCorrectAnswer(question) {
     return question.a - question.b;
+  },
+
+  getTimeLimitSeconds() {
+    return this.settings.timeLimitSeconds;
   },
 
   setDigitCounts(leftDigits, rightDigits) {

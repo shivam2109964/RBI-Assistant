@@ -59,6 +59,9 @@ const corePercentages = [
 const percentageTool = {
   id: "percentage",
   title: "Percentage Trainer",
+  settings: {
+    timeLimitSeconds: 7,
+  },
 
   getInputConfig() {
     return {
@@ -210,6 +213,10 @@ const percentageTool = {
     }
 
     return "";
+  },
+
+  getTimeLimitSeconds() {
+    return this.settings.timeLimitSeconds;
   },
 
   normalizeInput(value) {
