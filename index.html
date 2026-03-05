@@ -27,77 +27,102 @@
         <button class="tool-button" data-tool="simplification">Simplification Trainer</button>
         <button class="tool-button" data-tool="numberSeries">Number Series Trainer</button>
         <button class="tool-button" data-tool="mix">Mix Trainer</button>
+        <button class="tool-button" data-tool="analytics">Analytics</button>
       </nav>
     </aside>
 
     <main class="main">
-      <section class="practice-card" aria-live="polite">
-        <h2 id="tool-title">Addition Trainer</h2>
+      <div id="practice-view">
+        <section class="practice-card" aria-live="polite">
+          <h2 id="tool-title">Addition Trainer</h2>
 
-        <div class="digit-controls" id="digit-controls">
-          <label for="left-digits">Left digits</label>
-          <select id="left-digits" aria-label="Left side digit count">
-            <option value="1" selected>1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-          </select>
-          <label for="right-digits">Right digits</label>
-          <select id="right-digits" aria-label="Right side digit count">
-            <option value="1" selected>1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-          </select>
-        </div>
+          <div class="digit-controls" id="digit-controls">
+            <label for="left-digits">Left digits</label>
+            <select id="left-digits" aria-label="Left side digit count">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+            <label for="right-digits">Right digits</label>
+            <select id="right-digits" aria-label="Right side digit count">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
 
-        <div class="power-mode-controls" id="power-mode-controls" hidden>
-          <label for="power-mode">Mode</label>
-          <select id="power-mode" aria-label="Square cube mode">
-            <option value="mix" selected>Mix</option>
-            <option value="square">Square only</option>
-            <option value="cube">Cube only</option>
-          </select>
-        </div>
+          <div class="power-mode-controls" id="power-mode-controls" hidden>
+            <label for="power-mode">Mode</label>
+            <select id="power-mode" aria-label="Square cube mode">
+              <option value="mix" selected>Mix</option>
+              <option value="square">Square only</option>
+              <option value="cube">Cube only</option>
+            </select>
+          </div>
 
-        <div class="question-display" id="question-display">0 + 0 = ?</div>
+          <div class="question-display" id="question-display">0 + 0 = ?</div>
 
-        <form id="answer-form" autocomplete="off">
-          <label class="sr-only" for="answer-input">Answer</label>
-          <input id="answer-input" type="text" inputmode="numeric" placeholder="Type your answer" required />
-          <button type="submit" id="submit-button">Submit</button>
-        </form>
+          <form id="answer-form" autocomplete="off">
+            <label class="sr-only" for="answer-input">Answer</label>
+            <input id="answer-input" type="text" inputmode="numeric" placeholder="Type your answer" required />
+            <button type="submit" id="submit-button">Submit</button>
+          </form>
 
-        <div class="status-row">
-          <div>Question: <span id="question-number">1</span></div>
-          <div>Timer: <span id="timer-seconds">0</span>s</div>
-          <div>Correct: <span id="correct-count">0</span></div>
-          <div>Wrong: <span id="wrong-count">0</span></div>
-        </div>
+          <div class="status-row">
+            <div>Question: <span id="question-number">1</span></div>
+            <div>Timer: <span id="timer-seconds">0</span>s</div>
+            <div>Correct: <span id="correct-count">0</span></div>
+            <div>Wrong: <span id="wrong-count">0</span></div>
+          </div>
 
-        <p id="feedback" class="feedback" role="status"></p>
-      </section>
+          <p id="feedback" class="feedback" role="status"></p>
+        </section>
 
-      <section class="performance-panel">
-        <h3>Performance</h3>
+        <section class="performance-panel">
+          <h3>Performance</h3>
+          <div class="metrics-grid">
+            <div class="metric">
+              <span class="metric-label">Average Time / Question</span>
+              <span class="metric-value" id="avg-time">0.00s</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Slowest Questions</span>
+              <span class="metric-value" id="slowest-questions">-</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Accuracy</span>
+              <span class="metric-value" id="accuracy">0%</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Pattern Insight</span>
+              <span class="metric-value" id="pattern-insight">-</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="performance-panel" id="analytics-view" hidden>
+        <h3>Overall Analytics</h3>
         <div class="metrics-grid">
           <div class="metric">
-            <span class="metric-label">Average Time / Question</span>
-            <span class="metric-value" id="avg-time">0.00s</span>
+            <span class="metric-label">Total Attempts</span>
+            <span class="metric-value" id="overall-attempts">0</span>
           </div>
           <div class="metric">
-            <span class="metric-label">Slowest Questions</span>
-            <span class="metric-value" id="slowest-questions">-</span>
+            <span class="metric-label">Total Right</span>
+            <span class="metric-value" id="overall-correct">0</span>
           </div>
           <div class="metric">
-            <span class="metric-label">Accuracy</span>
-            <span class="metric-value" id="accuracy">0%</span>
+            <span class="metric-label">Total Wrong</span>
+            <span class="metric-value" id="overall-wrong">0</span>
           </div>
           <div class="metric">
-            <span class="metric-label">Pattern Insight</span>
-            <span class="metric-value" id="pattern-insight">-</span>
+            <span class="metric-label">Overall Avg Time</span>
+            <span class="metric-value" id="overall-avg-time">0.00s</span>
           </div>
         </div>
       </section>

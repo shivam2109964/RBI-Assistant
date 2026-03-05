@@ -24,6 +24,42 @@ const tools = {
   mix: mixTool,
 };
 
+const OVERALL_ANALYTICS_KEY = "rapidMathOverallAnalytics";
+const ANALYTICS_VIEW_KEY = "analytics";
+
+function loadOverallAnalytics() {
+  try {
+    const raw = localStorage.getItem(OVERALL_ANALYTICS_KEY);
+    if (!raw) {
+      return {
+        attempts: 0,
+        correct: 0,
+        wrong: 0,
+        totalTime: 0,
+      };
+    }
+
+    const parsed = JSON.parse(raw);
+    return {
+      attempts: Number(parsed.attempts) || 0,
+      correct: Number(parsed.correct) || 0,
+      wrong: Number(parsed.wrong) || 0,
+      totalTime: Number(parsed.totalTime) || 0,
+    };
+  } catch {
+    return {
+      attempts: 0,
+      correct: 0,
+      wrong: 0,
+      totalTime: 0,
+    };
+  }
+}
+
+function saveOverallAnalytics(analytics) {
+  localStorage.setItem(OVERALL_ANALYTICS_KEY, JSON.stringify(analytics));
+}
+
 const state = {
   activeToolKey: "addition",
   currentQuestion: null,
@@ -36,6 +72,7 @@ const state = {
   timerId: null,
   questionHistory: [],
   patternStats: {},
+  overallAnalytics: loadOverallAnalytics(),
 };
 
 const ui = {
@@ -57,6 +94,12 @@ const ui = {
   slowestQuestions: document.getElementById("slowest-questions"),
   accuracy: document.getElementById("accuracy"),
   patternInsight: document.getElementById("pattern-insight"),
+  overallAttempts: document.getElementById("overall-attempts"),
+  overallCorrect: document.getElementById("overall-correct"),
+  overallWrong: document.getElementById("overall-wrong"),
+  overallAvgTime: document.getElementById("overall-avg-time"),
+  practiceView: document.getElementById("practice-view"),
+  analyticsView: document.getElementById("analytics-view"),
   toolButtons: Array.from(document.querySelectorAll(".tool-button")),
 };
 
@@ -168,6 +211,17 @@ function updateMetrics() {
 
   ui.slowestQuestions.textContent = formatSlowestQuestions();
   ui.patternInsight.textContent = formatPatternInsight();
+  updateOverallAnalyticsUi();
+}
+
+function updateOverallAnalyticsUi() {
+  const overall = state.overallAnalytics;
+  const overallAvg = overall.attempts ? overall.totalTime / overall.attempts : 0;
+
+  ui.overallAttempts.textContent = String(overall.attempts);
+  ui.overallCorrect.textContent = String(overall.correct);
+  ui.overallWrong.textContent = String(overall.wrong);
+  ui.overallAvgTime.textContent = `${overallAvg.toFixed(2)}s`;
 }
 
 function registerPatternResult(isCorrect) {
@@ -237,22 +291,39 @@ function registerResult(isCorrect, options = {}) {
     timeTaken: state.timerSeconds,
   });
   registerPatternResult(isCorrect);
+  state.overallAnalytics.attempts += 1;
+  state.overallAnalytics.totalTime += state.timerSeconds;
 
   if (isCorrect) {
     state.correct += 1;
+    state.overallAnalytics.correct += 1;
     ui.feedback.textContent = "Correct";
     ui.feedback.className = "feedback correct";
   } else {
     state.wrong += 1;
+    state.overallAnalytics.wrong += 1;
     const tool = getActiveTool();
     const prefix = options.reason === "timeout" ? "Time up." : "Wrong.";
     ui.feedback.textContent = `${prefix} Correct answer: ${tool.getCorrectAnswer(state.currentQuestion)}`;
     ui.feedback.className = "feedback wrong";
   }
 
+  saveOverallAnalytics(state.overallAnalytics);
   updateMetrics();
   state.questionNumber += 1;
   renderQuestion();
+}
+
+function showPracticeView() {
+  ui.practiceView.hidden = false;
+  ui.analyticsView.hidden = true;
+}
+
+function showAnalyticsView() {
+  clearInterval(state.timerId);
+  updateOverallAnalyticsUi();
+  ui.practiceView.hidden = true;
+  ui.analyticsView.hidden = false;
 }
 
 function resetForTool(toolKey) {
@@ -316,7 +387,15 @@ ui.toolButtons.forEach((button) => {
 
     ui.toolButtons.forEach((btn) => btn.classList.remove("active"));
     button.classList.add("active");
-    resetForTool(button.dataset.tool);
+
+    const selectedTool = button.dataset.tool;
+    if (selectedTool === ANALYTICS_VIEW_KEY) {
+      showAnalyticsView();
+      return;
+    }
+
+    showPracticeView();
+    resetForTool(selectedTool);
   });
 });
 
@@ -324,4 +403,5 @@ ui.leftDigits.addEventListener("change", handleDigitChange);
 ui.rightDigits.addEventListener("change", handleDigitChange);
 ui.powerMode.addEventListener("change", handlePowerModeChange);
 
+showPracticeView();
 resetForTool("addition");
