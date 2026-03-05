@@ -231,6 +231,26 @@ body {
   cursor: pointer;
 }
 
+.timer-controls {
+  margin-top: 0.7rem;
+  display: flex;
+  gap: 0.7rem;
+}
+
+.timer-controls button {
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  color: var(--text);
+  border-radius: 0.6rem;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+}
+
+.timer-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .status-row {
   margin-top: 1rem;
   display: grid;

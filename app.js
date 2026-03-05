@@ -70,6 +70,7 @@ const state = {
   answeredQuestions: 0,
   timerSeconds: 0,
   timerId: null,
+  timerRunning: false,
   questionHistory: [],
   patternStats: {},
   overallAnalytics: loadOverallAnalytics(),
@@ -85,6 +86,8 @@ const ui = {
   questionDisplay: document.getElementById("question-display"),
   answerForm: document.getElementById("answer-form"),
   answerInput: document.getElementById("answer-input"),
+  timerStartButton: document.getElementById("timer-start-button"),
+  timerStopButton: document.getElementById("timer-stop-button"),
   questionNumber: document.getElementById("question-number"),
   timerSeconds: document.getElementById("timer-seconds"),
   correctCount: document.getElementById("correct-count"),
@@ -107,22 +110,43 @@ function getActiveTool() {
   return tools[state.activeToolKey];
 }
 
-function startTimer() {
+function syncTimerButtons() {
+  ui.timerStartButton.disabled = state.timerRunning;
+  ui.timerStopButton.disabled = !state.timerRunning;
+}
+
+function getActiveToolTimeLimit() {
   const tool = getActiveTool();
-  const timeLimit = typeof tool.getTimeLimitSeconds === "function"
+  return typeof tool.getTimeLimitSeconds === "function"
     ? Number(tool.getTimeLimitSeconds())
     : Number(tool.settings?.timeLimitSeconds);
+}
+
+function pauseTimer() {
+  clearInterval(state.timerId);
+  state.timerId = null;
+  state.timerRunning = false;
+  syncTimerButtons();
+}
+
+function startTimer(reset = false) {
+  const timeLimit = getActiveToolTimeLimit();
+
+  if (reset) {
+    state.timerSeconds = 0;
+    ui.timerSeconds.textContent = "0";
+  }
 
   clearInterval(state.timerId);
-  state.timerSeconds = 0;
-  ui.timerSeconds.textContent = "0";
+  state.timerRunning = true;
+  syncTimerButtons();
 
   state.timerId = setInterval(() => {
     state.timerSeconds += 1;
     ui.timerSeconds.textContent = String(state.timerSeconds);
 
     if (Number.isFinite(timeLimit) && timeLimit > 0 && state.timerSeconds >= timeLimit) {
-      clearInterval(state.timerId);
+      pauseTimer();
       registerResult(false, { reason: "timeout" });
     }
   }, 1000);
@@ -142,7 +166,7 @@ function renderQuestion() {
   ui.questionNumber.textContent = String(state.questionNumber);
   ui.answerInput.value = "";
   ui.answerInput.focus();
-  startTimer();
+  startTimer(true);
 }
 
 function configureAnswerInput(tool) {
@@ -320,7 +344,7 @@ function showPracticeView() {
 }
 
 function showAnalyticsView() {
-  clearInterval(state.timerId);
+  pauseTimer();
   updateOverallAnalyticsUi();
   ui.practiceView.hidden = true;
   ui.analyticsView.hidden = false;
@@ -377,6 +401,21 @@ ui.answerForm.addEventListener("submit", (event) => {
   const tool = getActiveTool();
   const isCorrect = tool.validateAnswer(state.currentQuestion, userAnswer);
   registerResult(isCorrect);
+});
+ui.timerStartButton.addEventListener("click", () => {
+  if (state.timerRunning || !state.currentQuestion) {
+    return;
+  }
+
+  startTimer(false);
+});
+
+ui.timerStopButton.addEventListener("click", () => {
+  if (!state.timerRunning) {
+    return;
+  }
+
+  pauseTimer();
 });
 
 ui.toolButtons.forEach((button) => {
