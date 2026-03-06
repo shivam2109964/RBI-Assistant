@@ -26,6 +26,9 @@ const tools = {
 
 const OVERALL_ANALYTICS_KEY = "rapidMathOverallAnalytics";
 const ANALYTICS_VIEW_KEY = "analytics";
+const PRO_STATUS_KEY = "rapidMathProStatus";
+const FREE_TOOL_KEYS = new Set(["addition", ANALYTICS_VIEW_KEY]);
+const PAID_PLAN_PRICE_LABEL = "Rs 149/month";
 
 function loadOverallAnalytics() {
   try {
@@ -60,6 +63,39 @@ function saveOverallAnalytics(analytics) {
   localStorage.setItem(OVERALL_ANALYTICS_KEY, JSON.stringify(analytics));
 }
 
+function loadProStatus() {
+  try {
+    const raw = localStorage.getItem(PRO_STATUS_KEY);
+    if (!raw) {
+      return {
+        unlocked: false,
+        unlockedAt: null,
+        subscriptionId: null,
+        paymentId: null,
+      };
+    }
+
+    const parsed = JSON.parse(raw);
+    return {
+      unlocked: Boolean(parsed.unlocked),
+      unlockedAt: parsed.unlockedAt ?? null,
+      subscriptionId: parsed.subscriptionId ?? null,
+      paymentId: parsed.paymentId ?? null,
+    };
+  } catch {
+    return {
+      unlocked: false,
+      unlockedAt: null,
+      subscriptionId: null,
+      paymentId: null,
+    };
+  }
+}
+
+function saveProStatus(status) {
+  localStorage.setItem(PRO_STATUS_KEY, JSON.stringify(status));
+}
+
 const state = {
   activeToolKey: "addition",
   currentQuestion: null,
@@ -74,6 +110,7 @@ const state = {
   questionHistory: [],
   patternStats: {},
   overallAnalytics: loadOverallAnalytics(),
+  proStatus: loadProStatus(),
 };
 
 const ui = {
@@ -103,8 +140,45 @@ const ui = {
   overallAvgTime: document.getElementById("overall-avg-time"),
   practiceView: document.getElementById("practice-view"),
   analyticsView: document.getElementById("analytics-view"),
+  subscriptionStatus: document.getElementById("subscription-status"),
+  subscribeButton: document.getElementById("subscribe-button"),
   toolButtons: Array.from(document.querySelectorAll(".tool-button")),
 };
+
+function isProUnlocked() {
+  return state.proStatus.unlocked;
+}
+
+function isToolLocked(toolKey) {
+  if (isProUnlocked()) {
+    return false;
+  }
+
+  return !FREE_TOOL_KEYS.has(toolKey);
+}
+
+function syncSubscriptionUi() {
+  if (isProUnlocked()) {
+    ui.subscriptionStatus.textContent = "Plan: Pro active";
+    ui.subscribeButton.textContent = "All tools unlocked";
+    ui.subscribeButton.disabled = true;
+    return;
+  }
+
+  ui.subscriptionStatus.textContent = "Plan: Free";
+  ui.subscribeButton.textContent = `Unlock All Tools - ${PAID_PLAN_PRICE_LABEL}`;
+  ui.subscribeButton.disabled = false;
+}
+
+function syncToolAccess() {
+  ui.toolButtons.forEach((button) => {
+    const toolKey = button.dataset.tool;
+    const locked = isToolLocked(toolKey);
+
+    button.disabled = locked;
+    button.title = locked ? `Subscribe (${PAID_PLAN_PRICE_LABEL}) to unlock` : "";
+  });
+}
 
 function getActiveTool() {
   return tools[state.activeToolKey];
@@ -350,6 +424,102 @@ function showAnalyticsView() {
   ui.analyticsView.hidden = false;
 }
 
+async function fetchJson(url, options = {}) {
+  const response = await fetch(url, options);
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(payload.error || "Request failed");
+  }
+
+  return payload;
+}
+
+async function beginSubscriptionFlow() {
+  if (isProUnlocked()) {
+    return;
+  }
+
+  if (typeof window.Razorpay !== "function") {
+    ui.feedback.textContent = "Payment gateway is not available. Refresh and try again.";
+    ui.feedback.className = "feedback wrong";
+    return;
+  }
+
+  ui.subscribeButton.disabled = true;
+  ui.subscribeButton.textContent = "Opening payment...";
+
+  try {
+    const config = await fetchJson("/api/payment/config");
+    const subscription = await fetchJson("/api/subscription/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+
+    const checkout = new window.Razorpay({
+      key: config.keyId,
+      name: "Rapid Math Trainer",
+      description: `Pro Plan (${PAID_PLAN_PRICE_LABEL})`,
+      subscription_id: subscription.subscriptionId,
+      handler: async (paymentResponse) => {
+        try {
+          const verify = await fetchJson("/api/subscription/verify", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(paymentResponse),
+          });
+
+          if (!verify.success) {
+            throw new Error("Unable to verify payment");
+          }
+
+          state.proStatus = {
+            unlocked: true,
+            unlockedAt: new Date().toISOString(),
+            subscriptionId: paymentResponse.razorpay_subscription_id || null,
+            paymentId: paymentResponse.razorpay_payment_id || null,
+          };
+          saveProStatus(state.proStatus);
+          syncSubscriptionUi();
+          syncToolAccess();
+          ui.feedback.textContent = "Subscription active. All tools are now unlocked.";
+          ui.feedback.className = "feedback correct";
+        } catch (error) {
+          ui.feedback.textContent = `Payment verification failed: ${error.message}`;
+          ui.feedback.className = "feedback wrong";
+          syncSubscriptionUi();
+        }
+      },
+      modal: {
+        ondismiss: () => {
+          syncSubscriptionUi();
+        },
+      },
+      theme: {
+        color: "#166534",
+      },
+    });
+
+    checkout.on("payment.failed", (event) => {
+      const reason = event?.error?.description || "Payment failed";
+      ui.feedback.textContent = reason;
+      ui.feedback.className = "feedback wrong";
+      syncSubscriptionUi();
+    });
+
+    checkout.open();
+  } catch (error) {
+    ui.feedback.textContent = `Unable to start subscription: ${error.message}`;
+    ui.feedback.className = "feedback wrong";
+    syncSubscriptionUi();
+  }
+}
+
 function resetForTool(toolKey) {
   state.activeToolKey = toolKey;
   state.currentQuestion = null;
@@ -420,14 +590,16 @@ ui.timerStopButton.addEventListener("click", () => {
 
 ui.toolButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    if (button.disabled) {
+    const selectedTool = button.dataset.tool;
+    if (isToolLocked(selectedTool)) {
+      ui.feedback.textContent = `Subscribe (${PAID_PLAN_PRICE_LABEL}) to unlock this tool.`;
+      ui.feedback.className = "feedback wrong";
       return;
     }
 
     ui.toolButtons.forEach((btn) => btn.classList.remove("active"));
     button.classList.add("active");
 
-    const selectedTool = button.dataset.tool;
     if (selectedTool === ANALYTICS_VIEW_KEY) {
       showAnalyticsView();
       return;
@@ -441,6 +613,9 @@ ui.toolButtons.forEach((button) => {
 ui.leftDigits.addEventListener("change", handleDigitChange);
 ui.rightDigits.addEventListener("change", handleDigitChange);
 ui.powerMode.addEventListener("change", handlePowerModeChange);
+ui.subscribeButton.addEventListener("click", beginSubscriptionFlow);
 
 showPracticeView();
+syncSubscriptionUi();
+syncToolAccess();
 resetForTool("addition");

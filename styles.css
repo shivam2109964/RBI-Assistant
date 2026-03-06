@@ -41,6 +41,13 @@ body {
   backdrop-filter: blur(6px);
 }
 
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .header h1 {
   margin: 0;
   font-size: 1.75rem;
@@ -49,6 +56,34 @@ body {
 .header p {
   margin: 0.3rem 0 0;
   color: var(--muted);
+}
+
+.subscription-box {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.subscription-status {
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+#subscribe-button {
+  border: 1px solid #f59e0b;
+  background: #78350f;
+  color: var(--text);
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#subscribe-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .sidebar {
@@ -104,7 +139,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 1rem;
   padding: 1.5rem;
 }
@@ -338,15 +373,141 @@ body {
   .sidebar {
     border-right: 0;
     border-bottom: 1px solid var(--border);
+    padding: 0.8rem 0.7rem 0.9rem;
   }
 
   .sidebar nav {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .tool-button {
+    text-align: center;
+    padding: 0.6rem 0.5rem;
+    font-size: 0.93rem;
+    min-height: 44px;
+  }
+
+  .header-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .subscription-box {
+    justify-content: flex-start;
+  }
+
+  .main {
+    padding: 1rem 0.8rem 1.25rem;
+  }
+
+  .practice-card,
+  .performance-panel {
+    width: 100%;
   }
 
   .status-row,
   .metrics-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .header {
+    padding: 1rem 0.9rem;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .header p {
+    font-size: 0.98rem;
+  }
+
+  #subscribe-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .sidebar nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .practice-card {
+    padding: 1rem 0.85rem;
+  }
+
+  .question-display {
+    margin: 0.8rem 0;
+    padding: 0.9rem 0.65rem;
+    font-size: clamp(1.7rem, 8vw, 2.2rem);
+    line-height: 1.25;
+  }
+
+  #answer-form {
+    grid-template-columns: 1fr;
+  }
+
+  #submit-button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  #answer-input {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  .timer-controls {
+    width: 100%;
+  }
+
+  .timer-controls button {
+    flex: 1;
+    min-height: 42px;
+  }
+
+  .status-row {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .header h1 {
+    font-size: 1.35rem;
+  }
+
+  .sidebar h2 {
+    margin-bottom: 0.55rem;
+  }
+
+  .tool-button {
+    font-size: 0.88rem;
+    padding: 0.55rem 0.45rem;
+  }
+
+  .digit-controls,
+  .power-mode-controls {
+    gap: 0.4rem;
+  }
+
+  .digit-controls select,
+  .power-mode-controls select {
+    min-height: 40px;
+  }
+
+  .question-display {
+    font-size: clamp(1.5rem, 8.2vw, 1.95rem);
+  }
+
+  .performance-panel {
+    padding: 0.9rem 0.85rem;
   }
 }
